@@ -11,6 +11,8 @@ export interface UserProfile {
   fcmToken?: string;
   createdAt?: any;
   lastSeen?: any;
+  claimedReferral?: boolean;
+  referredBy?: string;
 }
 
 export type DepositMethod = 'DANA' | 'QRIS';
@@ -110,17 +112,22 @@ export interface ToastItem {
 
 export type ToastMessage = ToastItem;
 
+export interface BroadcastNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'promo' | 'alert' | 'success';
+  createdAt: any;
+  createdBy?: string;
+}
+
 export type ActiveTab =
   | 'dashboard'
   | 'order'
-  | 'hd-foto'
+  | 'orders'
   | 'deposit'
-  | 'catalog'
-  | 'my-orders'
-  | 'deposit-history'
-  | 'mutations'
+  | 'katalog'
+  | 'mutasi'
+  | 'referral'
   | 'profile'
-  | 'apk'
-  | 'bonus'
-  | 'help'
   | 'admin';
