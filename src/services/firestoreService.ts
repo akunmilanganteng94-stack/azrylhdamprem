@@ -10,6 +10,7 @@ import {
   limit,
   onSnapshot,
   addDoc,
+  deleteDoc,
   serverTimestamp,
   runTransaction,
   type Unsubscribe
@@ -21,7 +22,8 @@ import type {
   OrderRecord, 
   MutationRecord, 
   ProductItem, 
-  SystemSettings 
+  SystemSettings,
+  BroadcastNotification
 } from '../types';
 
 export const OWNER_EMAIL = 'apriliansyahazril10@gmail.com';
@@ -70,7 +72,6 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 export async function syncUserProfile(user: { uid: string; email: string | null; displayName: string | null }): Promise<UserProfile> {
   const userRef = doc(db, 'users', user.uid);
   const snap = await getDoc(userRef);
-
   const isOwner = (user.email || '').toLowerCase() === OWNER_EMAIL.toLowerCase();
 
   if (!snap.exists()) {
@@ -91,7 +92,6 @@ export async function syncUserProfile(user: { uid: string; email: string | null;
     return newProfile;
   } else {
     const existing = snap.data() as UserProfile;
-    // Keep owner as admin if not set
     const shouldBeAdmin = isOwner || existing.role === 'admin';
     const updates: Partial<UserProfile> = {
       lastSeen: serverTimestamp(),
@@ -123,7 +123,6 @@ export function listenSystemSettings(callback: (settings: SystemSettings) => voi
     if (snap.exists()) {
       callback({ ...DEFAULT_SETTINGS, ...snap.data() } as SystemSettings);
     } else {
-      // Seed default settings
       setDoc(settingsRef, DEFAULT_SETTINGS).catch(console.error);
       callback(DEFAULT_SETTINGS);
     }
@@ -143,7 +142,6 @@ export function listenProducts(callback: (products: ProductItem[]) => void): Uns
   const productsCol = collection(db, 'products');
   return onSnapshot(productsCol, (snap) => {
     if (snap.empty) {
-      // Seed initial products
       INITIAL_PRODUCTS.forEach(p => {
         setDoc(doc(db, 'products', p.id), { ...p, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }).catch(console.error);
       });
@@ -203,13 +201,11 @@ function getMillis(time: any): number {
 }
 
 export function listenUserDeposits(uid: string, callback: (deposits: DepositRecord[]) => void): Unsubscribe {
-  // Query by uid only to avoid requiring composite indexes in Firestore
   const q = query(
     collection(db, 'deposits'),
     where('uid', '==', uid),
     limit(100)
   );
-
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as DepositRecord));
     list.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
@@ -225,7 +221,6 @@ export function listenAllDeposits(callback: (deposits: DepositRecord[]) => void)
     orderBy('createdAt', 'desc'),
     limit(100)
   );
-
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as DepositRecord));
     callback(list);
@@ -239,11 +234,9 @@ export async function approveDeposit(depositId: string, adminUid: string): Promi
   return await runTransaction(db, async (transaction) => {
     const depositRef = doc(db, 'deposits', depositId);
     const depositSnap = await transaction.get(depositRef);
-
     if (!depositSnap.exists()) {
       throw new Error('Deposit tidak ditemukan.');
     }
-
     const deposit = depositSnap.data() as DepositRecord;
     if (deposit.status !== 'PENDING') {
       throw new Error(`Deposit sudah berstatus ${deposit.status}`);
@@ -251,11 +244,9 @@ export async function approveDeposit(depositId: string, adminUid: string): Promi
 
     const userRef = doc(db, 'users', deposit.uid);
     const userSnap = await transaction.get(userRef);
-
     if (!userSnap.exists()) {
       throw new Error('User pembuat deposit tidak ditemukan.');
     }
-
     const userData = userSnap.data() as UserProfile;
     const balanceBefore = userData.balance || 0;
     const balanceAfter = balanceBefore + deposit.amount;
@@ -333,14 +324,11 @@ export async function executeOrderSuccessTransaction(params: {
   return await runTransaction(db, async (transaction) => {
     const userRef = doc(db, 'users', params.uid);
     const userSnap = await transaction.get(userRef);
-
     if (!userSnap.exists()) {
       throw new Error('User tidak ditemukan.');
     }
-
     const userData = userSnap.data() as UserProfile;
     const currentBalance = userData.balance || 0;
-
     if (currentBalance < params.totalCost) {
       throw new Error('Saldo tidak mencukupi untuk melakukan transaksi.');
     }
@@ -415,13 +403,11 @@ export async function recordFailedOrder(params: {
 }
 
 export function listenUserOrders(uid: string, callback: (orders: OrderRecord[]) => void): Unsubscribe {
-  // Query by uid only to avoid requiring composite indexes in Firestore
   const q = query(
     collection(db, 'orders'),
     where('uid', '==', uid),
     limit(100)
   );
-
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as OrderRecord));
     list.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
@@ -437,24 +423,21 @@ export function listenAllOrders(callback: (orders: OrderRecord[]) => void): Unsu
     orderBy('createdAt', 'desc'),
     limit(100)
   );
-
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as OrderRecord));
     callback(list);
   }, (err) => {
-    console.warn('Notice listening all orders:', err?.message || err);
+    console.error('Error listening all orders:', err);
   });
 }
 
 // MUTATIONS
 export function listenUserMutations(uid: string, callback: (mutations: MutationRecord[]) => void): Unsubscribe {
-  // Query by uid only to avoid requiring composite indexes in Firestore
   const q = query(
     collection(db, 'mutations'),
     where('uid', '==', uid),
     limit(100)
   );
-
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as MutationRecord));
     list.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
@@ -485,7 +468,6 @@ export async function adminAdjustUserBalance(params: {
     const userRef = doc(db, 'users', params.targetUid);
     const snap = await transaction.get(userRef);
     if (!snap.exists()) throw new Error('User tidak ditemukan.');
-
     const userData = snap.data() as UserProfile;
     const currentBalance = userData.balance || 0;
     const newBalance = Math.max(0, currentBalance + params.deltaAmount);
@@ -519,12 +501,10 @@ export async function addReferralBonus(uid: string, referralCode: string, bonusA
     const userRef = doc(db, 'users', uid);
     const snap = await transaction.get(userRef);
     if (!snap.exists()) throw new Error('Akun pengguna tidak ditemukan.');
-
     const userData = snap.data();
     if (userData.claimedReferral) {
       throw new Error('Anda sudah pernah mengklaim bonus referral sebelumnya.');
     }
-
     const currentBalance = Number(userData.balance) || 0;
     const newBalance = currentBalance + bonusAmount;
 
@@ -546,5 +526,43 @@ export async function addReferralBonus(uid: string, referralCode: string, bonusA
       createdAt: serverTimestamp()
     });
   });
+}
+
+// BROADCAST NOTIFICATIONS MANAGEMENT
+export async function createBroadcastNotification(data: {
+  title: string;
+  message: string;
+  type?: 'info' | 'promo' | 'alert' | 'success';
+  adminUid: string;
+}): Promise<string> {
+  const col = collection(db, 'notifications');
+  const docRef = await addDoc(col, {
+    title: data.title.trim(),
+    message: data.message.trim(),
+    type: data.type || 'info',
+    createdBy: data.adminUid,
+    createdAt: serverTimestamp()
+  });
+  return docRef.id;
+}
+
+export function listenBroadcastNotifications(callback: (notifications: BroadcastNotification[]) => void): Unsubscribe {
+  const q = query(
+    collection(db, 'notifications'),
+    orderBy('createdAt', 'desc'),
+    limit(50)
+  );
+  return onSnapshot(q, (snap) => {
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as BroadcastNotification));
+    callback(list);
+  }, (err) => {
+    console.warn('Notice listening notifications:', err?.message || err);
+    callback([]);
+  });
+}
+
+export async function deleteBroadcastNotification(notificationId: string): Promise<void> {
+  const ref = doc(db, 'notifications', notificationId);
+  await deleteDoc(ref);
 }
 
