@@ -79,7 +79,16 @@ export const OrderAmModal: React.FC<OrderAmModalProps> = ({
         })
       });
 
-      const proxyData = await proxyResponse.json();
+      const rawText = await proxyResponse.text();
+      let proxyData: any;
+      try {
+        proxyData = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error('AM Proxy raw response:', rawText);
+        throw new Error(
+          `Server mengembalikan format non-JSON (HTTP ${proxyResponse.status}). Pastikan file vercel.json dan folder api/ terunggah di repositori GitHub/Vercel.`
+        );
+      }
 
       if (!proxyResponse.ok || !proxyData.success) {
         const errorMsg = proxyData.error || 'Server AM Prem gagal memproses akun.';

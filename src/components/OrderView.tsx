@@ -90,7 +90,17 @@ export const OrderView: React.FC<OrderViewProps> = ({
         })
       });
 
-      const resJson = await response.json();
+      const rawText = await response.text();
+      let resJson: any;
+      try {
+        resJson = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error('AM API raw response:', rawText);
+        throw new Error(
+          `Server mengembalikan format non-JSON (HTTP ${response.status}). Pastikan file vercel.json dan folder api/ terunggah di repositori GitHub/Vercel.`
+        );
+      }
+
       if (!response.ok || !resJson.success) {
         throw new Error(resJson.error || 'Server penyedia gagal memproses akun Alight Motion.');
       }
@@ -162,7 +172,17 @@ export const OrderView: React.FC<OrderViewProps> = ({
         body: formData
       });
 
-      const resJson = await response.json();
+      const rawText = await response.text();
+      let resJson: any;
+      try {
+        resJson = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error('HD API raw response:', rawText);
+        throw new Error(
+          `Server mengembalikan format non-JSON (HTTP ${response.status}). Pastikan file vercel.json dan folder api/ terunggah di repositori GitHub/Vercel.`
+        );
+      }
+
       if (!response.ok || !resJson.success) {
         throw new Error(resJson.error || 'Server gagal meningkatkan resolusi gambar.');
       }
