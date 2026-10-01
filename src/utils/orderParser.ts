@@ -6,16 +6,37 @@ export interface ParsedAmAccount {
 }
 
 /**
- * Parses any response from AM API into a clean list of accounts with gmail and inboxurl
+ * Clean and extract pure email address (no extra prefixes/suffixes)
+ */
+function cleanEmail(text: string): string {
+  if (!text) return '';
+  const match = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (match) return match[0];
+  return text.replace(/^(email|gmail|mail|user):\s*/i, '').trim();
+}
+
+/**
+ * Clean and extract pure URL (no extra prefixes/suffixes)
+ */
+function cleanUrl(text: string): string {
+  if (!text) return '';
+  const match = text.match(/https?:\/\/[^\s"'<>|]+/);
+  if (match) return match[0];
+  return text.replace(/^(inbox|url|link):\s*/i, '').trim();
+}
+
+/**
+ * Parses any response from AM API into a clean list of accounts with only pure Gmail and pure inboxurl
  */
 export function parseAmAccounts(result: any): ParsedAmAccount[] {
   if (!result) return [];
 
-  // If already array of objects
   let items: any[] = [];
 
   if (Array.isArray(result)) {
     items = result;
+  } else if (Array.isArray(result?.results)) {
+    items = result.results;
   } else if (Array.isArray(result?.data)) {
     items = result.data;
   } else if (Array.isArray(result?.result)) {
@@ -23,27 +44,29 @@ export function parseAmAccounts(result: any): ParsedAmAccount[] {
   } else if (Array.isArray(result?.accounts)) {
     items = result.accounts;
   } else if (typeof result === 'object') {
-    // If it's a single object with gmail/inboxurl directly
-    const directGmail = result.gmail || result.email || result.mail || result.username || result.user;
-    const directInbox = result.inboxurl || result.inboxUrl || result.inbox_url || result.url || result.link || result.inbox;
-
-    if (directGmail || directInbox) {
-      items = [result];
+    // Check if it's nested
+    if (result.results && Array.isArray(result.results)) {
+      items = result.results;
+    } else if (result.data && Array.isArray(result.data)) {
+      items = result.data;
     } else if (result.data && typeof result.data === 'object') {
       return parseAmAccounts(result.data);
     } else if (result.result && typeof result.result === 'object') {
       return parseAmAccounts(result.result);
     } else {
-      // Look through all values
-      items = [result];
+      const directGmail = result.email || result.gmail || result.mail || result.username || result.user;
+      const directInbox = result.inboxUrl || result.inboxurl || result.inbox_url || result.url || result.link || result.inbox;
+      if (directGmail || directInbox) {
+        items = [result];
+      } else {
+        items = [result];
+      }
     }
   } else if (typeof result === 'string') {
-    // Check if it's JSON string
     try {
       const parsed = JSON.parse(result);
       return parseAmAccounts(parsed);
     } catch {
-      // Split by newlines
       const lines = result.split(/\r?\n/).filter((l: string) => l.trim().length > 0);
       items = lines;
     }
@@ -55,40 +78,39 @@ export function parseAmAccounts(result: any): ParsedAmAccount[] {
     if (!item) return;
 
     if (typeof item === 'object') {
-      // Common field variations
-      const gmail = item.gmail || item.email || item.mail || item.username || item.user || '';
-      const inboxurl = item.inboxurl || item.inboxUrl || item.inbox_url || item.url || item.link || item.inbox || '';
+      const rawEmail = item.email || item.gmail || item.mail || item.username || item.user || '';
+      const rawInbox = item.inboxUrl || item.inboxurl || item.inbox_url || item.url || item.link || item.inbox || '';
 
-      if (gmail || inboxurl) {
-        accounts.push({
-          id: `am-${index}-${gmail || index}`,
-          gmail: String(gmail).trim(),
-          inboxurl: String(inboxurl).trim(),
-          raw: item
-        });
-      } else {
-        // Search object values for email and url patterns
+      let gmail = cleanEmail(String(rawEmail));
+      let inboxurl = cleanUrl(String(rawInbox));
+
+      // If either was not in explicit keys, look through values
+      if (!gmail || !inboxurl) {
         const values = Object.values(item).map(v => typeof v === 'object' ? JSON.stringify(v) : String(v));
-        const foundEmail = values.find(v => v.includes('@')) || '';
-        const foundUrl = values.find(v => v.startsWith('http://') || v.startsWith('https://')) || '';
-
-        accounts.push({
-          id: `am-${index}`,
-          gmail: foundEmail || values[0] || 'Akun Alight Motion',
-          inboxurl: foundUrl,
-          raw: item
-        });
+        if (!gmail) {
+          const foundEmailStr = values.find(v => v.includes('@')) || '';
+          gmail = cleanEmail(foundEmailStr);
+        }
+        if (!inboxurl) {
+          const foundUrlStr = values.find(v => v.startsWith('http://') || v.startsWith('https://')) || '';
+          inboxurl = cleanUrl(foundUrlStr);
+        }
       }
+
+      accounts.push({
+        id: `am-${index}-${gmail || index}`,
+        gmail: gmail,
+        inboxurl: inboxurl,
+        raw: item
+      });
     } else if (typeof item === 'string') {
-      // String format like: "email@gmail.com|https://..." or "email@gmail.com https://..."
-      const parts = item.split(/[|\s,;]+/);
-      const foundEmail = parts.find(p => p.includes('@')) || parts[0] || '';
-      const foundUrl = parts.find(p => p.startsWith('http://') || p.startsWith('https://')) || parts[1] || '';
+      const gmail = cleanEmail(item);
+      const inboxurl = cleanUrl(item);
 
       accounts.push({
         id: `am-${index}`,
-        gmail: foundEmail.trim(),
-        inboxurl: foundUrl.trim(),
+        gmail,
+        inboxurl,
         raw: item
       });
     }
@@ -103,7 +125,6 @@ export function parseAmAccounts(result: any): ParsedAmAccount[] {
 export function extractHdImageUrl(result: any): string | null {
   if (!result) return null;
 
-  // Direct string URL or dataUrl
   if (typeof result === 'string') {
     if (result.startsWith('http://') || result.startsWith('https://') || result.startsWith('data:image/')) {
       return result;
@@ -116,7 +137,6 @@ export function extractHdImageUrl(result: any): string | null {
     }
   }
 
-  // Object checks
   if (typeof result === 'object') {
     if (result.resultUrl) return result.resultUrl;
     if (result.url) return result.url;
@@ -125,7 +145,6 @@ export function extractHdImageUrl(result: any): string | null {
     if (result.image) return result.image;
     if (result.photo) return result.photo;
 
-    // Check nested in result.data or result.result
     if (result.data) {
       const nested = extractHdImageUrl(result.data);
       if (nested) return nested;
@@ -135,7 +154,6 @@ export function extractHdImageUrl(result: any): string | null {
       if (nested) return nested;
     }
 
-    // Check if any value is a valid image URL or data URI
     const values = Object.values(result);
     for (const val of values) {
       if (typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:image/'))) {
