@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Sparkles, Check, ArrowRight, X, ShieldCheck } from 'lucide-react';
+import { Tag, ArrowRight, X } from 'lucide-react';
 import { formatRupiah } from '../utils/formatter';
 import type { ProductItem } from '../types';
 
@@ -63,7 +63,6 @@ export const KatalogModal: React.FC<KatalogModalProps> = ({
                     {prod.active ? 'Tersedia' : 'Habis'}
                   </span>
                 </div>
-
                 <h3 className="text-base font-black text-slate-900">{prod.name}</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">{prod.description}</p>
               </div>
@@ -75,7 +74,6 @@ export const KatalogModal: React.FC<KatalogModalProps> = ({
                     {formatRupiah(prod.price)}
                   </span>
                 </div>
-
                 <button
                   disabled={!prod.active}
                   onClick={() => {

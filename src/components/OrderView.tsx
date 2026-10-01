@@ -2,21 +2,14 @@ import React, { useState } from 'react';
 import { 
   ShoppingBag, 
   Sparkles, 
-  Wallet, 
-  Check, 
   AlertCircle, 
-  Copy, 
-  Download, 
   ArrowRight, 
   Plus, 
   Minus, 
   Upload, 
-  Image as ImageIcon,
-  CheckCircle2,
-  RefreshCw,
-  ExternalLink,
-  Mail,
-  Inbox
+  CheckCircle2, 
+  Download, 
+  ExternalLink 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -39,15 +32,14 @@ export const OrderView: React.FC<OrderViewProps> = ({
   initialProduct = 'am'
 }) => {
   const { profile, refreshUserProfile } = useAuth();
-  const { showSuccess, showError, showInfo } = useToast();
+  const { showSuccess, showError } = useToast();
 
   const [selectedProduct, setSelectedProduct] = useState<'am' | 'hd'>(initialProduct);
-  
+
   // Alight Motion State
   const [amCount, setAmCount] = useState<number>(1);
   const [amLoading, setAmLoading] = useState<boolean>(false);
   const [amResult, setAmResult] = useState<any>(null);
-  const [copiedResult, setCopiedResult] = useState<boolean>(false);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
   // HD Foto State
@@ -89,7 +81,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
     setAmResult(null);
 
     try {
-      // Step 1: Call proxy server to call Zyvor Bulk V3
       const response = await fetch('/api/proxy/am', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,12 +91,10 @@ export const OrderView: React.FC<OrderViewProps> = ({
       });
 
       const resJson = await response.json();
-
       if (!response.ok || !resJson.success) {
         throw new Error(resJson.error || 'Server penyedia gagal memproses akun Alight Motion.');
       }
 
-      // Step 2: Deduct balance & record order atomically in Firestore
       const newOrder = await createOrderWithDeduction(
         profile.uid,
         'am_prem',
@@ -121,7 +110,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
         orderId: newOrder.id,
         data: resJson.data
       });
-
       showSuccess('Order Berhasil Diproses!', `${amCount} Akun Alight Motion Premium siap digunakan.`);
     } catch (err: any) {
       console.error('AM Order Error:', err);
@@ -175,12 +163,10 @@ export const OrderView: React.FC<OrderViewProps> = ({
       });
 
       const resJson = await response.json();
-
       if (!response.ok || !resJson.success) {
         throw new Error(resJson.error || 'Server gagal meningkatkan resolusi gambar.');
       }
 
-      // Record order & deduct balance atomically
       const newOrder = await createOrderWithDeduction(
         profile.uid,
         'hd_foto',
@@ -196,7 +182,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
         orderId: newOrder.id,
         data: resJson.data
       });
-
       showSuccess('Foto HD Berhasil!', 'Resolusi foto berhasil ditingkatkan dengan jernih.');
     } catch (err: any) {
       console.error('HD Order Error:', err);
@@ -204,25 +189,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
     } finally {
       setHdLoading(false);
     }
-  };
-
-  const copyAmResultText = () => {
-    if (!amResult?.data) return;
-    let text = '';
-    if (typeof amResult.data === 'string') {
-      text = amResult.data;
-    } else if (Array.isArray(amResult.data)) {
-      text = amResult.data.map((item: any) => typeof item === 'object' ? JSON.stringify(item) : String(item)).join('\n');
-    } else if (amResult.data.result) {
-      text = typeof amResult.data.result === 'object' ? JSON.stringify(amResult.data.result, null, 2) : String(amResult.data.result);
-    } else {
-      text = JSON.stringify(amResult.data, null, 2);
-    }
-
-    navigator.clipboard.writeText(text);
-    setCopiedResult(true);
-    showSuccess('Tersalin!', 'Data akun berhasil disalin ke clipboard.');
-    setTimeout(() => setCopiedResult(false), 2500);
   };
 
   return (
@@ -271,18 +237,16 @@ export const OrderView: React.FC<OrderViewProps> = ({
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
-          {/* Logo Alight Motion */}
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden shrink-0 bg-white flex items-center justify-center p-1 border border-slate-200 shadow-xs">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center p-0 border border-slate-800 shadow-sm relative">
             <img 
               src="https://1000logos.net/wp-content/uploads/2024/03/Alight-Motion-Logo.png" 
               alt="Alight Motion" 
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover scale-125"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 e.currentTarget.parentElement?.classList.add('bg-emerald-600');
               }}
             />
-            {/* Fallback */}
             <span className="text-white font-black text-xs hidden">AM</span>
           </div>
           <div className="min-w-0">
@@ -357,7 +321,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Tentukan Jumlah Akun
             </label>
-
             {/* Quick Presets (Max 5 per proses) */}
             <div className="flex flex-wrap items-center gap-2">
               {[1, 2, 3, 4, 5].map((preset) => (
@@ -407,7 +370,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-
               <div className="flex flex-col">
                 <span className="text-xs text-slate-500 font-medium">
                   Subtotal: <span className="font-mono font-bold text-slate-900">{formatRupiah(totalAmPrice)}</span>
@@ -478,15 +440,34 @@ export const OrderView: React.FC<OrderViewProps> = ({
             )}
           </button>
 
-          {/* Result: HANYA 2 BARIS (Gmail & Inbox URL) Tanpa Yang Lain */}
+          {/* Result: CUKUP MASUKAN GMAIL DAN DI BAWAH NYA LINK INBOX URL, DAN BISA SALIN KE 2 NYA */}
           {amResult && (() => {
             const parsedAccounts = parseAmAccounts(amResult.data);
             return (
               <div className="mt-6 space-y-3 animate-in fade-in">
                 {parsedAccounts.map((acc, idx) => (
-                  <div key={acc.id || idx} className="bg-white rounded-2xl p-3 sm:p-4 border-2 border-emerald-500 shadow-md space-y-2.5">
-                    {/* Baris 1: Gmail */}
-                    <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-200">
+                  <div key={acc.id || idx} className="bg-white rounded-2xl p-3.5 sm:p-4 border-2 border-emerald-500 shadow-md space-y-2.5">
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                      <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                        Akun #{idx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const combined = `Gmail: ${acc.gmail}\nInbox URL: ${acc.inboxurl}`;
+                          navigator.clipboard.writeText(combined);
+                          setCopiedItem(`both-${idx}`);
+                          showSuccess('Tersalin Keduanya!', 'Gmail dan Inbox URL berhasil disalin.');
+                          setTimeout(() => setCopiedItem(null), 2000);
+                        }}
+                        className="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 rounded-lg text-xs font-black transition active:scale-95 cursor-pointer shadow-2xs"
+                      >
+                        {copiedItem === `both-${idx}` ? '✓ Tersalin Keduanya' : '📋 Salin Keduanya'}
+                      </button>
+                    </div>
+
+                    {/* Baris 1: Gmail murni saja dengan tombol salin */}
+                    <div className="flex items-center justify-between gap-2 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs font-black text-slate-500 shrink-0">Gmail:</span>
                         <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all truncate">
@@ -509,14 +490,14 @@ export const OrderView: React.FC<OrderViewProps> = ({
                       )}
                     </div>
 
-                    {/* Baris 2: Inbox URL */}
-                    <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-200">
+                    {/* Baris 2: Inbox URL murni dari API saja dengan tombol buka & salin */}
+                    <div className="flex items-center justify-between gap-2 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs font-black text-slate-500 shrink-0">Inbox URL:</span>
                         <a 
                           href={acc.inboxurl} 
                           target="_blank" 
-                          rel="noopener noreferrer" 
+                          rel="noopener noreferrer"
                           className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline truncate block"
                         >
                           {acc.inboxurl || '-'}
@@ -602,7 +583,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Upload Foto yang Ingin Dijernihkan
             </label>
-
             <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center transition-all bg-slate-50/60 relative">
               <input
                 type="file"
@@ -610,7 +590,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
                 onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-
               {hdPreview ? (
                 <div className="flex flex-col items-center space-y-3">
                   <div className="w-40 h-40 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-md">
@@ -740,7 +719,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
 
                 {hdPhotoUrl ? (
                   <div className="space-y-4">
-                    {/* Foto Display */}
                     <div className="w-full max-h-[420px] rounded-2xl overflow-hidden border-2 border-emerald-300 bg-slate-900/5 shadow-md flex items-center justify-center p-1">
                       <img 
                         src={hdPhotoUrl} 
@@ -748,8 +726,6 @@ export const OrderView: React.FC<OrderViewProps> = ({
                         className="w-full h-full object-contain max-h-[400px] rounded-xl" 
                       />
                     </div>
-
-                    {/* Action buttons */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <a
                         href={hdPhotoUrl}

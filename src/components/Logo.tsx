@@ -80,17 +80,20 @@ export const Logo: React.FC<LogoProps> = ({
             d="M50 16 L22 82 L38 82 L46 62 L50 62 Z" 
             fill="url(#azryl-green-main)" 
           />
+
           {/* Right leg */}
           <path 
             d="M50 16 L78 82 L62 82 L54 62 L50 62 Z" 
             fill="url(#azryl-green-accent)" 
           />
+
           {/* Floating Diamond Core */}
           <polygon 
             points="50,34 58,48 50,56 42,48" 
             fill="#ffffff" 
             filter="url(#green-glow)"
           />
+
           {/* Bottom connecting tech accent */}
           <rect 
             x="40" 

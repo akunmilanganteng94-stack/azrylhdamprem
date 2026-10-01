@@ -7,14 +7,15 @@ import {
   Clock, 
   CheckCircle2, 
   XCircle, 
-  AlertCircle, 
   Copy, 
   Eye, 
   ArrowUpRight, 
   ArrowDownLeft,
   X,
   Download,
-  Filter
+  ExternalLink,
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -24,6 +25,7 @@ import {
   listenUserDeposits, 
   listenUserMutations 
 } from '../services/firestoreService';
+import { parseAmAccounts, extractHdImageUrl } from '../utils/orderParser';
 import type { OrderRecord, DepositRecord, MutationRecord } from '../types';
 
 interface HistoryViewProps {
@@ -33,28 +35,23 @@ interface HistoryViewProps {
 export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' }) => {
   const { profile } = useAuth();
   const { showSuccess } = useToast();
-
   const [activeTab, setActiveTab] = useState<'orders' | 'deposits' | 'mutations'>(initialTab);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [deposits, setDeposits] = useState<DepositRecord[]>([]);
   const [mutations, setMutations] = useState<MutationRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [orderProductFilter, setOrderProductFilter] = useState<'ALL' | 'am_prem' | 'hd_foto'>('ALL');
   const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile) return;
-    setLoading(true);
-
     const unsubOrders = listenUserOrders(profile.uid, (data) => {
       setOrders(data);
-      setLoading(false);
     });
-
     const unsubDeposits = listenUserDeposits(profile.uid, (data) => {
       setDeposits(data);
     });
-
     const unsubMutations = listenUserMutations(profile.uid, (data) => {
       setMutations(data);
     });
@@ -107,9 +104,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
     }
   };
 
-  const copyToClipboard = (text: string, label = 'Teks') => {
+  const copyToClipboard = (text: string, id: string, label = 'Teks') => {
     navigator.clipboard.writeText(text);
+    setCopiedId(id);
     showSuccess('Tersalin!', `${label} disalin ke clipboard.`);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -125,7 +124,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
               Pantau seluruh aktivitas pesanan, riwayat deposit, dan mutasi saldo akun Anda.
             </p>
           </div>
-
           {/* Search bar */}
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -134,7 +132,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari ID atau nama..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-violet-500"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
@@ -143,33 +141,31 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
         <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mt-5 overflow-x-auto text-xs font-bold">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'orders'
-                ? 'bg-white text-violet-700 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Pesanan Saya ({orders.length})</span>
           </button>
-
           <button
             onClick={() => setActiveTab('deposits')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'deposits'
-                ? 'bg-white text-violet-700 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <History className="w-4 h-4" />
             <span>Riwayat Deposit ({deposits.length})</span>
           </button>
-
           <button
             onClick={() => setActiveTab('mutations')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'mutations'
-                ? 'bg-white text-violet-700 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -181,73 +177,141 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
 
       {/* TAB 1: PESANAN SAYA */}
       {activeTab === 'orders' && (
-        <div className="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
-          {orders.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-                <ShoppingBag className="w-8 h-8" />
-              </div>
-              <h3 className="text-base font-bold text-slate-800">Belum Ada Pesanan</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                Anda belum pernah melakukan order produk. Silakan coba order AM Prem Verif atau HD Foto.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {orders
-                .filter(o => 
-                  !searchTerm || 
-                  o.productName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                  (o.id && o.id.toLowerCase().includes(searchTerm.toLowerCase()))
-                )
-                .map((order) => (
-                  <div key={order.id} className="p-4 sm:p-5 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-11 h-11 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-sm shrink-0">
-                        {order.productId === 'am_prem' ? 'AM' : 'HD'}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-900">{order.productName}</h4>
-                          {getStatusBadge(order.status)}
-                        </div>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Jumlah: <strong>{order.quantity}x</strong> • Total: <strong className="font-mono text-slate-800">{formatRupiah(order.total)}</strong>
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400 font-mono">
-                          <span>ID: {order.id?.slice(0, 10)}...</span>
-                          <button
-                            onClick={() => copyToClipboard(order.id || '', 'ID Transaksi')}
-                            className="hover:text-violet-600"
-                            title="Salin ID"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </button>
-                          <span>• {formatDate(order.createdAt)}</span>
-                        </div>
-                      </div>
-                    </div>
+        <div className="space-y-4">
+          {/* Sub-Tabs: Pisahin AM Prem & HD Foto */}
+          <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setOrderProductFilter('ALL')}
+              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                orderProductFilter === 'ALL'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Semua Pesanan</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700">
+                {orders.length}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrderProductFilter('am_prem')}
+              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                orderProductFilter === 'am_prem'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Alight Motion Prem</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">
+                {orders.filter(o => o.productId === 'am_prem').length}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrderProductFilter('hd_foto')}
+              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                orderProductFilter === 'hd_foto'
+                  ? 'bg-white text-teal-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>HD Foto AI</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-100 text-teal-800">
+                {orders.filter(o => o.productId === 'hd_foto').length}
+              </span>
+            </button>
+          </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-                      {order.result && (
-                        <button
-                          onClick={() => setSelectedOrder(order)}
-                          className="px-3 py-1.5 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Lihat Hasil</span>
-                        </button>
-                      )}
-                      {order.errorMessage && (
-                        <span className="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
-                          {order.errorMessage}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
+            {orders.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+                <h3 className="text-base font-bold text-slate-800">Belum Ada Pesanan</h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Anda belum pernah melakukan order produk. Silakan coba order AM Prem Verif atau HD Foto.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {orders
+                  .filter(o => {
+                    if (orderProductFilter !== 'ALL' && o.productId !== orderProductFilter) return false;
+                    if (!searchTerm) return true;
+                    return (
+                      o.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      (o.id && o.id.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                  })
+                  .map((order) => {
+                    const isAm = order.productId === 'am_prem';
+                    return (
+                      <div key={order.id} className="p-4 sm:p-5 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3.5">
+                          <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 shadow-sm overflow-hidden p-0 relative">
+                            {isAm ? (
+                              <img 
+                                src="https://1000logos.net/wp-content/uploads/2024/03/Alight-Motion-Logo.png" 
+                                alt="Alight Motion" 
+                                className="w-full h-full object-cover scale-125"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement?.classList.add('bg-emerald-600');
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white">
+                                <Sparkles className="w-5 h-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="text-sm font-bold text-slate-900">{order.productName}</h4>
+                              {getStatusBadge(order.status)}
+                            </div>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Jumlah: <strong>{order.quantity}x</strong> • Total: <strong className="font-mono text-slate-800">{formatRupiah(order.total)}</strong>
+                            </p>
+                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400 font-mono">
+                              <span>ID: {order.id?.slice(0, 10)}...</span>
+                              <button
+                                onClick={() => copyToClipboard(order.id || '', `order-id-${order.id}`, 'ID Transaksi')}
+                                className="hover:text-emerald-600 cursor-pointer"
+                                title="Salin ID"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                              <span>• {formatDate(order.createdAt)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-center">
+                          {order.result && (
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Lihat Hasil</span>
+                            </button>
+                          )}
+                          {order.errorMessage && (
+                            <span className="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
+                              {order.errorMessage}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -269,14 +333,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
               {deposits
                 .filter(d => 
                   !searchTerm || 
-                  d.senderName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                  d.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                   d.method.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map((deposit) => (
                   <div key={deposit.id} className="p-4 sm:p-5 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
                       <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                        deposit.method === 'DANA' ? 'bg-blue-100 text-blue-700' : 'bg-violet-100 text-violet-700'
+                        deposit.method === 'DANA' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700'
                       }`}>
                         {deposit.method}
                       </div>
@@ -298,8 +362,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
 
                     <div className="text-right">
                       {deposit.rejectionReason && (
-                        <p className="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
-                          Alasan: {deposit.rejectionReason}
+                        <p className="text-xs text-rose-600 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-200">
+                          Alasan Ditolak: <strong>{deposit.rejectionReason}</strong>
                         </p>
                       )}
                     </div>
@@ -339,7 +403,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
                         <h4 className="text-xs sm:text-sm font-bold text-slate-900">{mut.description}</h4>
                         <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
                           <span>Sebelum: {formatRupiah(mut.balanceBefore)}</span>
-                          <span>→</span>
+                          <span>•</span>
                           <span>Sesudah: <strong className="text-slate-800">{formatRupiah(mut.balanceAfter)}</strong></span>
                         </div>
                         <p className="text-[10px] text-slate-400 mt-0.5">
@@ -363,62 +427,125 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
         </div>
       )}
 
-      {/* Order Result Modal */}
+      {/* Order Result Modal (SAMAKAN FORMATNYA: CUKUP GMAIL & INBOX URL DENGAN SALIN MASING-MASING) */}
       {selectedOrder && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-black text-slate-900">
                 Detail Hasil: {selectedOrder.productName}
               </h3>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {selectedOrder.result?.resultUrl ? (
-              <div className="space-y-3">
-                <img
-                  src={selectedOrder.result.resultUrl}
-                  alt="Hasil HD"
-                  className="w-full max-h-72 object-contain rounded-2xl bg-slate-900"
-                />
-                <a
-                  href={selectedOrder.result.resultUrl}
-                  download="HD_FOTO_AZRYL.png"
-                  className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center justify-center gap-1.5"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download Foto HD</span>
-                </a>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-600">
-                  <span>Daftar Akun:</span>
-                  <button
-                    onClick={() => {
-                      const text = typeof selectedOrder.result === 'string' 
-                        ? selectedOrder.result 
-                        : JSON.stringify(selectedOrder.result, null, 2);
-                      copyToClipboard(text, 'Akun');
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 hover:bg-violet-100 flex items-center gap-1"
+            {selectedOrder.productId === 'am_prem' ? (() => {
+              const parsed = parseAmAccounts(selectedOrder.result);
+              return (
+                <div className="space-y-3">
+                  {parsed.map((acc, idx) => (
+                    <div key={acc.id || idx} className="p-3.5 bg-white rounded-2xl border-2 border-emerald-400 shadow-sm space-y-2.5">
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                        <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                          Akun #{idx + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(`Gmail: ${acc.gmail}\nInbox URL: ${acc.inboxurl}`, `hist-both-${idx}`, 'Gmail & Inbox URL')}
+                          className="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 rounded-lg text-xs font-black transition active:scale-95 cursor-pointer shadow-2xs"
+                        >
+                          {copiedId === `hist-both-${idx}` ? '✓ Tersalin Keduanya' : '📋 Salin Keduanya'}
+                        </button>
+                      </div>
+
+                      {/* Baris 1: Gmail murni */}
+                      <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-black text-slate-500 shrink-0">Gmail:</span>
+                          <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all truncate">
+                            {acc.gmail || '-'}
+                          </span>
+                        </div>
+                        {acc.gmail && (
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(acc.gmail, `hist-gmail-${idx}`, 'Gmail')}
+                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
+                          >
+                            {copiedId === `hist-gmail-${idx}` ? 'Tersalin' : 'Salin'}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Baris 2: Inbox URL murni dari API */}
+                      <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-black text-slate-500 shrink-0">Inbox URL:</span>
+                          <a 
+                            href={acc.inboxurl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline truncate block"
+                          >
+                            {acc.inboxurl || '-'}
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {acc.inboxurl && (
+                            <a
+                              href={acc.inboxurl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition active:scale-95 cursor-pointer shadow-2xs"
+                            >
+                              Buka
+                            </a>
+                          )}
+                          {acc.inboxurl && (
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(acc.inboxurl, `hist-inbox-${idx}`, 'Inbox URL')}
+                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition active:scale-95 cursor-pointer shadow-2xs"
+                            >
+                              {copiedId === `hist-inbox-${idx}` ? 'Tersalin' : 'Salin'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })() : selectedOrder.result?.resultUrl || extractHdImageUrl(selectedOrder.result) ? (() => {
+              const url = selectedOrder.result?.resultUrl || extractHdImageUrl(selectedOrder.result)!;
+              return (
+                <div className="space-y-3">
+                  <img
+                    src={url}
+                    alt="Hasil HD"
+                    className="w-full max-h-72 object-contain rounded-2xl bg-slate-900"
+                  />
+                  <a
+                    href={url}
+                    download="HD_FOTO_AZRYL.png"
+                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                   >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Salin</span>
-                  </button>
+                    <Download className="w-4 h-4" />
+                    <span>Download Foto HD</span>
+                  </a>
                 </div>
-                <div className="p-3.5 bg-slate-900 text-violet-300 font-mono text-xs rounded-2xl max-h-60 overflow-y-auto leading-relaxed">
-                  <pre className="whitespace-pre-wrap break-all">
-                    {typeof selectedOrder.result === 'string'
-                      ? selectedOrder.result
-                      : JSON.stringify(selectedOrder.result, null, 2)}
-                  </pre>
-                </div>
+              );
+            })() : (
+              <div className="p-3 bg-slate-900 text-emerald-400 font-mono text-xs rounded-2xl max-h-60 overflow-y-auto leading-relaxed">
+                <pre className="whitespace-pre-wrap break-all">
+                  {typeof selectedOrder.result === 'string'
+                    ? selectedOrder.result
+                    : JSON.stringify(selectedOrder.result, null, 2)}
+                </pre>
               </div>
             )}
           </div>

@@ -2,14 +2,12 @@ import React, { useState, useRef } from 'react';
 import { 
   X, 
   UploadCloud, 
-  Image as ImageIcon, 
   Wallet, 
   CheckCircle2, 
   AlertCircle, 
   Download, 
   Sparkles, 
   ArrowRight,
-  ZoomIn,
   RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -33,14 +31,12 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
 }) => {
   const { profile } = useAuth();
   const { showSuccess, showError, showWarning } = useToast();
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [scale, setScale] = useState<number>(2);
+  const [scale] = useState<number>(2);
   const [loading, setLoading] = useState<boolean>(false);
   const [resultImageUrl, setResultImageUrl] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
@@ -110,7 +106,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
 
       if (!response.ok || !json.success) {
         const errorMsg = json.error || 'Server upscale gagal memproses foto.';
-        // Log failed order without deducting balance
         await recordFailedOrder({
           uid: profile.uid,
           productId: 'hd_foto',
@@ -120,12 +115,10 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
           totalCost: PRICE_PER_PHOTO,
           errorMessage: errorMsg
         });
-
         showError('Order HD Foto Gagal', `${errorMsg}. Saldo Anda TIDAK terpotong.`);
         return;
       }
 
-      // Success: Extract image result
       let resultUrl = '';
       if (json.data?.resultUrl) {
         resultUrl = json.data.resultUrl;
@@ -139,7 +132,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
         resultUrl = previewUrl || '';
       }
 
-      // Deduct balance and record success in Firestore transaction
       await executeOrderSuccessTransaction({
         uid: profile.uid,
         productId: 'hd_foto',
@@ -175,7 +167,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-white">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 font-bold">
@@ -197,15 +188,13 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
               setResultImageUrl(null);
               onClose();
             }}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
-          {/* SUCCESS RESULT VIEW */}
           {resultImageUrl ? (
             <div className="space-y-4 animate-in zoom-in-95">
               <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
@@ -216,7 +205,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                 <p className="text-xs text-emerald-700">Saldo telah terpotong Rp50 secara otomatis.</p>
               </div>
 
-              {/* Image Result Preview */}
               <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-md">
                 <img
                   src={resultImageUrl}
@@ -228,7 +216,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex gap-2.5 pt-2">
                 <button
                   onClick={() => {
@@ -236,14 +223,14 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                     setPreviewUrl(null);
                     setResultImageUrl(null);
                   }}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Foto Lain</span>
                 </button>
                 <button
                   onClick={handleDownloadResult}
-                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Gambar HD</span>
@@ -252,7 +239,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
             </div>
           ) : (
             <>
-              {/* Saldo Indicator Card */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
@@ -265,26 +251,23 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                     </p>
                   </div>
                 </div>
-
                 {!isBalanceEnough && (
                   <button
                     onClick={() => {
                       onClose();
                       onOpenDeposit();
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-xs transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
                   >
                     + Top Up
                   </button>
                 )}
               </div>
 
-              {/* File Upload / Drop Area */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Upload Foto Yang Ingin Diperjelas
                 </label>
-
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -304,7 +287,7 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-3 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-md"
+                        className="px-3 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-md cursor-pointer"
                       >
                         Ganti Foto
                       </button>
@@ -314,7 +297,7 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                           setSelectedFile(null);
                           setPreviewUrl(null);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-md"
+                        className="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-md cursor-pointer"
                       >
                         Hapus
                       </button>
@@ -343,7 +326,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                 )}
               </div>
 
-              {/* Price Breakdown */}
               <div className="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100 space-y-2">
                 <div className="flex justify-between text-xs text-slate-600 font-medium">
                   <span>Biaya Upscale:</span>
@@ -361,7 +343,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                 </div>
               </div>
 
-              {/* Insufficient balance message */}
               {!isBalanceEnough && (
                 <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
@@ -369,12 +350,11 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
                 </div>
               )}
 
-              {/* Process Button */}
               <button
                 type="button"
                 onClick={handleInitiateUpscale}
                 disabled={loading || !selectedFile || !isBalanceEnough}
-                className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
               >
                 <span>Proses HD ({formatRupiah(PRICE_PER_PHOTO)})</span>
                 <ArrowRight className="w-4 h-4" />
@@ -384,33 +364,30 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto">
               <Sparkles className="w-6 h-6" />
             </div>
-
             <div>
               <h3 className="text-base font-bold text-slate-900">Konfirmasi Proses HD</h3>
               <p className="text-xs text-slate-500 mt-1">
                 Proses HD Foto akan memotong saldo <strong>Rp50</strong>. Jika proses gagal, saldo Anda tidak akan terpotong.
               </p>
             </div>
-
             <div className="flex gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleConfirmUpscale}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
               >
                 Ya, Proses HD
               </button>
@@ -419,7 +396,6 @@ export const OrderHdModal: React.FC<OrderHdModalProps> = ({
         </div>
       )}
 
-      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-70 flex flex-col items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
           <div className="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mb-4 shadow-xl animate-spin">

@@ -123,6 +123,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+
             return (
               <button
                 key={item.id}

@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  Wallet, 
   QrCode, 
   Smartphone, 
   Copy, 
   Check, 
   ArrowRight, 
-  AlertCircle, 
-  ShieldCheck, 
   CheckCircle2, 
   ArrowLeft,
   Download
@@ -34,8 +31,6 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
   const danaName = settings?.danaName || 'JEJE';
   const qrisUrl = settings?.qrisUrl || 'https://api.zyvor.my.id/files/16e4dbd0fc28a8031b247897df219df5.jpeg';
 
-  // Step 1: Input nominal & nama
-  // Step 2: Pilih metode DANA/QRIS & konfirmasi sudah bayar
   const [step, setStep] = useState<1 | 2>(1);
   const [amount, setAmount] = useState<number>(10000);
   const [senderName, setSenderName] = useState<string>(profile?.name || '');
@@ -43,7 +38,7 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
   const [loading, setLoading] = useState<boolean>(false);
   const [copiedDana, setCopiedDana] = useState<boolean>(false);
 
-  const presets = [5000, 10000, 25000, 50000, 100000, 250000];
+  const presets = [1000, 5000, 10000, 25000, 50000, 100000, 250000];
 
   const handleCopyDana = () => {
     navigator.clipboard.writeText(danaNumber);
@@ -54,34 +49,28 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
 
   const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isDepositOpen) {
       showError('Deposit Ditutup', 'Layanan deposit saat ini sedang ditutup sementara oleh Admin.');
       return;
     }
-
     if (!senderName.trim()) {
       showWarning('Nama Wajib Diisi', 'Silakan masukkan nama Anda / nama pengirim transfer.');
       return;
     }
-
     if (amount < minDeposit) {
       showWarning('Nominal Terlalu Kecil', `Minimal deposit adalah ${formatRupiah(minDeposit)}.`);
       return;
     }
-
     if (amount > maxDeposit) {
       showWarning('Nominal Terlalu Besar', `Maksimal deposit adalah ${formatRupiah(maxDeposit)}.`);
       return;
     }
-
     setStep(2);
   };
 
   const handleConfirmPaid = async () => {
     if (!profile) return;
     setLoading(true);
-
     try {
       await createDeposit({
         uid: profile.uid,
@@ -95,7 +84,6 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
         'Deposit Berhasil Dikirim!',
         `Deposit ${formatRupiah(amount)} sedang dicek oleh admin. Saldo akan bertambah setelah disetujui.`
       );
-
       if (onSuccessNavigate) {
         onSuccessNavigate();
       }
@@ -123,7 +111,6 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
               Saldo otomatis terpotong saat melakukan order layanan.
             </p>
           </div>
-
           <div className="text-right text-xs space-y-1">
             <span className="text-slate-400 block">Status Akun:</span>
             <span className="font-black text-emerald-400 uppercase tracking-wider bg-emerald-900/50 px-2.5 py-1 rounded-lg border border-emerald-500/20">
@@ -133,7 +120,7 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
         </div>
       </div>
 
-      {/* STEP 1: Cukup Masukin Nominal sama Nama */}
+      {/* STEP 1: Input Nominal & Nama */}
       {step === 1 && (
         <form onSubmit={handleStep1Submit} className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xl shadow-slate-200/50 space-y-6">
           <div className="border-b border-slate-100 pb-4">
@@ -187,8 +174,9 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
                 </button>
               ))}
             </div>
+
             <span className="text-[11px] text-slate-400 block">
-              Minimal deposit {formatRupiah(minDeposit)} — Maksimal {formatRupiah(maxDeposit)}.
+              Minimal deposit {formatRupiah(minDeposit)} • Maksimal {formatRupiah(maxDeposit)}.
             </span>
           </div>
 
@@ -243,7 +231,6 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
                 </p>
               </div>
             </div>
-
             <div className="text-right">
               <span className="text-[10px] text-slate-400 uppercase font-bold block">Nominal</span>
               <span className="text-lg font-black font-mono text-emerald-600">
@@ -278,7 +265,6 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
               <QrCode className="w-4 h-4" />
               <span>QRIS Instan (Semua E-Wallet & Bank)</span>
             </button>
-
             <button
               type="button"
               onClick={() => setMethod('DANA')}

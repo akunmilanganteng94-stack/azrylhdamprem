@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  UserCheck, 
   Mail, 
-  Wallet, 
-  ShieldCheck, 
   Bell, 
   Sparkles, 
   LogOut, 
   Check, 
   Edit3, 
   ExternalLink,
-  MessageCircle,
-  Award
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatRupiah, calculateUserRank, formatDate } from '../utils/formatter';
+import { formatRupiah, calculateUserRank } from '../utils/formatter';
 import { requestNotificationPermission } from '../firebase/messaging';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -28,7 +24,6 @@ interface ProfileViewProps {
 export const ProfileView: React.FC<ProfileViewProps> = ({ settings }) => {
   const { profile, logout } = useAuth();
   const { showSuccess, showError, showInfo } = useToast();
-
   const [isEditing, setIsEditing] = useState(false);
   const [nameInput, setNameInput] = useState(profile?.name || '');
   const [saving, setSaving] = useState(false);
@@ -130,9 +125,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ settings }) => {
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
                   : 'bg-slate-100 text-slate-700'
               }`}>
-                {profile?.role === 'admin' ? '🛡️ Administrator' : '👤 Active Member'}
+                {profile?.role === 'admin' ? '👑 Administrator' : '⭐ Active Member'}
               </span>
-
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                 Level {rank.level} • {rank.name}
               </span>
@@ -148,7 +142,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ settings }) => {
               {formatRupiah(profile?.balance || 0)}
             </span>
           </div>
-
           <div className="bg-slate-50 p-4 rounded-2xl">
             <span className="text-slate-400 text-[10px] uppercase font-bold block">Total Belanja</span>
             <span className="text-lg sm:text-xl font-black font-mono text-slate-900 mt-1 block">

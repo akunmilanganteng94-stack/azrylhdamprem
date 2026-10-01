@@ -13,14 +13,12 @@ import {
   ArrowRight, 
   Sparkles, 
   Crown, 
-  CheckCircle2, 
-  Clock, 
   ChevronRight,
   Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { formatRupiah, getGreeting, calculateUserRank, formatDate } from '../utils/formatter';
-import { listenUserOrders, listenAllOrders, listenAllUsers } from '../services/firestoreService';
+import { formatRupiah, getGreeting, calculateUserRank } from '../utils/formatter';
+import { listenUserOrders, listenAllUsers } from '../services/firestoreService';
 import type { ProductItem, OrderRecord, SystemSettings, UserProfile } from '../types';
 
 interface DashboardViewProps {
@@ -38,12 +36,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenOrder,
   onOpenKatalog,
   onNavigateTab,
-  onOpenApkModal,
   products,
   settings
 }) => {
   const { profile } = useAuth();
-
   const [showBalance, setShowBalance] = useState<boolean>(true);
   const [userOrders, setUserOrders] = useState<OrderRecord[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -53,11 +49,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const unsubUser = listenUserOrders(profile.uid, (orders) => {
       setUserOrders(orders);
     });
-
     const unsubUsers = listenAllUsers((users) => {
       setAllUsers(users);
     });
-
     return () => {
       unsubUser();
       unsubUsers();
@@ -160,7 +154,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Kelola transaksi, pantau saldo, dan gunakan tools premium AZRYLPREM.
           </p>
         </div>
-
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
@@ -175,7 +168,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* 2. Wallet Card in Dark Slate + Emerald Green */}
       <div className="bg-gradient-to-tr from-slate-950 via-emerald-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-900/10 border border-emerald-900/40 relative overflow-hidden transition-all duration-300 hover:shadow-emerald-950/20">
-        {/* Soft background ambient glow */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -193,10 +185,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-
             <div>
               <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold block">
-                Balance
+                Total Balance
               </span>
               <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white mt-1">
                 {showBalance ? formatRupiah(balance) : 'Rp ••••••••'}
@@ -276,11 +267,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             <div>
               <div className="flex items-center justify-between gap-1.5 mb-2.5">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white p-1 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 shadow-sm overflow-hidden p-0 relative">
                   <img 
                     src="https://1000logos.net/wp-content/uploads/2024/03/Alight-Motion-Logo.png" 
                     alt="Alight Motion Logo" 
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover scale-125"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.parentElement?.classList.add('bg-emerald-600');
@@ -291,7 +282,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   HOT
                 </span>
               </div>
-
               <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight group-hover:text-emerald-600 transition-colors">
                 Alight motion premium
               </h3>
@@ -307,7 +297,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </span>
                 <span className="text-[9px] text-slate-400 block -mt-0.5">/ akun</span>
               </div>
-
               <span className="px-2.5 py-1 rounded-xl bg-emerald-600 group-hover:bg-emerald-700 text-white font-black text-[10px] sm:text-xs shadow-xs transition flex items-center gap-1">
                 <span>Order</span>
                 <ArrowRight className="w-3 h-3 stroke-[2.5]" />
@@ -329,7 +318,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   AI
                 </span>
               </div>
-
               <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight group-hover:text-emerald-600 transition-colors">
                 HD FOTO RESOLUTION
               </h3>
@@ -345,7 +333,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </span>
                 <span className="text-[9px] text-slate-400 block -mt-0.5">/ foto</span>
               </div>
-
               <span className="px-2.5 py-1 rounded-xl bg-slate-900 group-hover:bg-slate-800 text-white font-black text-[10px] sm:text-xs shadow-xs transition flex items-center gap-1">
                 <span>Jernihkan</span>
                 <ArrowRight className="w-3 h-3 stroke-[2.5]" />
@@ -355,7 +342,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </section>
 
-      {/* 4. Grid Menu Cepat (Item ke-8 adalah PROFIL) */}
+      {/* 4. Grid Menu Cepat */}
       <section className="space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
           Menu Cepat
@@ -401,7 +388,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {userOrders.filter(o => o.status === 'SUCCESS').length} Sukses
           </span>
         </div>
-
         <div className="bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-100 shadow-xs">
           <span className="text-[9px] sm:text-[10px] font-bold uppercase text-slate-400 block">Total Belanja</span>
           <span className="text-lg sm:text-2xl font-black font-mono text-emerald-600 mt-1 block">
@@ -409,7 +395,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </span>
           <span className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 block">Akumulasi</span>
         </div>
-
         <div className="bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-100 shadow-xs">
           <span className="text-[9px] sm:text-[10px] font-bold uppercase text-slate-400 block">Saldo Aktif</span>
           <span className="text-lg sm:text-2xl font-black font-mono text-slate-900 mt-1 block">
@@ -417,7 +402,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </span>
           <span className="text-[10px] sm:text-[11px] text-emerald-600 font-semibold mt-0.5 block">Siap Order</span>
         </div>
-
         <div className="bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-100 shadow-xs">
           <span className="text-[9px] sm:text-[10px] font-bold uppercase text-slate-400 block">Status Akun</span>
           <span className="text-sm sm:text-lg font-black text-slate-900 mt-1 block truncate">
@@ -427,7 +411,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </section>
 
-      {/* 6. Top Sultan Pengguna (Riwayat Terakhir telah dihapus dari Home) */}
+      {/* 6. Top Sultan Pengguna */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -447,7 +431,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           ) : (
             topSultans.map((sultan, index) => (
               <div 
-                key={sultan.uid || index} 
+                key={sultan.uid || index}
                 className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">

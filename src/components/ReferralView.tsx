@@ -6,10 +6,7 @@ import {
   Check, 
   Share2, 
   ArrowRight, 
-  Sparkles, 
   Coins, 
-  CheckCircle2,
-  AlertCircle,
   ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -20,7 +17,6 @@ import { addReferralBonus } from '../services/firestoreService';
 export const ReferralView: React.FC = () => {
   const { profile, refreshUserProfile } = useAuth();
   const { showSuccess, showError, showWarning } = useToast();
-
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [inputReferral, setInputReferral] = useState('');
@@ -62,12 +58,10 @@ export const ReferralView: React.FC = () => {
     e.preventDefault();
     if (!profile) return;
     const cleanCode = inputReferral.trim().toUpperCase();
-
     if (!cleanCode) {
       showWarning('Kode Kosong', 'Silakan masukkan kode referral teman Anda.');
       return;
     }
-
     if (cleanCode === userRefCode) {
       showError('Tidak Valid', 'Anda tidak dapat menggunakan kode referral milik sendiri.');
       return;
@@ -95,7 +89,6 @@ export const ReferralView: React.FC = () => {
             <Gift className="w-3.5 h-3.5" />
             <span>PROGRAM REFERRAL 20 TEMAN = 10K</span>
           </div>
-
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Undang 20 Teman, Dapatkan Rp 10.000!
           </h1>

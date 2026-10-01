@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Download, CheckCircle2, ShieldCheck, X, Sparkles, AlertCircle } from 'lucide-react';
+import { Smartphone, Download, CheckCircle2, ShieldCheck, X, AlertCircle } from 'lucide-react';
 import type { SystemSettings } from '../types';
 
 interface ApkModalProps {

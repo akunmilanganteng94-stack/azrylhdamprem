@@ -138,7 +138,7 @@ export const AuthView: React.FC = () => {
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs">
             {isRegister 
-              ? 'Daftar akun untuk order Alight Motion Premium & gunakan AI HD tools.' 
+              ? 'Daftar akun untuk order Alight Motion Premium & gunakan AI HD tools.'
               : 'Kelola transaksi, pantau saldo, dan order layanan digital AZRYLPREM.'}
           </p>
         </div>
@@ -195,7 +195,7 @@ export const AuthView: React.FC = () => {
               <button
                 type="button"
                 onClick={copyDomain}
-                className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg font-sans font-bold flex items-center gap-1 shrink-0 transition cursor-pointer"
+                className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-lg font-sans font-bold flex items-center gap-1 shrink-0 transition cursor-pointer"
               >
                 {copiedDomain ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedDomain ? 'Tersalin' : 'Salin Domain'}</span>
@@ -217,8 +217,8 @@ export const AuthView: React.FC = () => {
             <div className="text-[11px] text-amber-900/90 space-y-1 pt-1 border-t border-amber-200/60">
               <p><strong>Langkah Aktivasi Google Auth:</strong></p>
               <ol className="list-decimal pl-4 space-y-0.5">
-                <li>Klik tombol di atas untuk membuka <strong>Firebase Console &rarr; Authentication &rarr; Settings</strong>.</li>
-                <li>Pilih tab <strong>Authorized domains &rarr; Add domain</strong>.</li>
+                <li>Klik tombol di atas untuk membuka <strong>Firebase Console → Authentication → Settings</strong>.</li>
+                <li>Pilih tab <strong>Authorized domains → Add domain</strong>.</li>
                 <li>Paste domain <code className="bg-amber-100/70 px-1 py-0.5 rounded">{currentHostname}</code> lalu klik Simpan.</li>
               </ol>
             </div>

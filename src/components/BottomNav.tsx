@@ -4,7 +4,7 @@ import {
   ShoppingBag, 
   History, 
   Wallet, 
-  User
+  User 
 } from 'lucide-react';
 
 interface BottomNavProps {
@@ -23,7 +23,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const handleTabClick = (tab: string, isOrder = false) => {
     setClickedTab(tab);
     setTimeout(() => setClickedTab(null), 300);
-
     if (isOrder) {
       onOpenOrder();
     } else {
@@ -62,7 +61,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               {isActive && (
                 <span className="absolute -top-1 w-6 h-1 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-in fade-in zoom-in-75 duration-200" />
               )}
-
               {/* Icon Container with subtle animation */}
               <div className={`p-1.5 rounded-2xl transition-all duration-200 ${
                 isActive 
@@ -71,7 +69,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               }`}>
                 <Icon className={`w-5 h-5 sm:w-5.5 sm:h-5.5 ${isActive ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
               </div>
-
               <span className={`text-[10px] sm:text-[11px] mt-0.5 tracking-tight transition-all duration-200 ${
                 isActive ? 'text-emerald-700 font-black scale-105' : 'text-slate-400'
               }`}>
