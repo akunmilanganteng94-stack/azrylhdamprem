@@ -112,7 +112,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-5 sm:space-y-6 pb-24 sm:pb-28">
       {/* Title & Tabs */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-slate-100">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -138,39 +138,39 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mt-5 overflow-x-auto text-xs font-bold">
+        <div className="flex gap-1.5 sm:gap-2 p-1 bg-slate-100 rounded-2xl mt-4 sm:mt-5 overflow-x-auto text-xs font-bold no-scrollbar">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'orders'
                 ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Pesanan Saya ({orders.length})</span>
+            <ShoppingBag className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">Pesanan Saya ({orders.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('deposits')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'deposits'
                 ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <History className="w-4 h-4" />
-            <span>Riwayat Deposit ({deposits.length})</span>
+            <History className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">Riwayat Deposit ({deposits.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('mutations')}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'mutations'
                 ? 'bg-white text-emerald-700 shadow-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <ReceiptText className="w-4 h-4" />
-            <span>Mutasi Saldo ({mutations.length})</span>
+            <ReceiptText className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">Mutasi Saldo ({mutations.length})</span>
           </button>
         </div>
       </div>
@@ -179,11 +179,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
       {activeTab === 'orders' && (
         <div className="space-y-4">
           {/* Sub-Tabs: Pisahin AM Prem & HD Foto */}
-          <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-100 rounded-2xl w-full sm:w-auto overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={() => setOrderProductFilter('ALL')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`shrink-0 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 orderProductFilter === 'ALL'
                   ? 'bg-white text-emerald-700 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
@@ -197,7 +197,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
             <button
               type="button"
               onClick={() => setOrderProductFilter('am_prem')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`shrink-0 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 orderProductFilter === 'am_prem'
                   ? 'bg-white text-emerald-700 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
@@ -211,7 +211,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
             <button
               type="button"
               onClick={() => setOrderProductFilter('hd_foto')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`shrink-0 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 orderProductFilter === 'hd_foto'
                   ? 'bg-white text-teal-700 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
@@ -337,21 +337,21 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
                   d.method.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map((deposit) => (
-                  <div key={deposit.id} className="p-4 sm:p-5 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  <div key={deposit.id} className="p-3.5 sm:p-5 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 ${
                         deposit.method === 'DANA' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700'
                       }`}>
                         {deposit.method}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-extrabold font-mono text-slate-900">
                             {formatRupiah(deposit.amount)}
                           </span>
                           {getStatusBadge(deposit.status)}
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-slate-500 mt-0.5 truncate">
                           Pengirim: <strong className="text-slate-700">{deposit.senderName}</strong> via {deposit.method}
                         </p>
                         <p className="text-[11px] text-slate-400 mt-0.5">
@@ -360,9 +360,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-left sm:text-right shrink-0">
                       {deposit.rejectionReason && (
-                        <p className="text-xs text-rose-600 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-200">
+                        <p className="text-xs text-rose-600 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-200 break-words max-w-xs">
                           Alasan Ditolak: <strong>{deposit.rejectionReason}</strong>
                         </p>
                       )}
@@ -429,8 +429,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
 
       {/* Order Result Modal (SAMAKAN FORMATNYA: CUKUP GMAIL & INBOX URL DENGAN SALIN MASING-MASING) */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base font-black text-slate-900">
                 Detail Hasil: {selectedOrder.productName}
@@ -462,11 +462,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
                         </button>
                       </div>
 
-                      {/* Baris 1: Gmail murni */}
-                      <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-black text-slate-500 shrink-0">Gmail:</span>
-                          <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all truncate">
+                      {/* Baris 1: Gmail murni (tanpa terpotong di mobile) */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                          <span className="text-xs font-black text-slate-500 shrink-0 mt-0.5 sm:mt-0">Gmail:</span>
+                          <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all break-all leading-snug">
                             {acc.gmail || '-'}
                           </span>
                         </div>
@@ -474,27 +474,27 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ initialTab = 'orders' 
                           <button
                             type="button"
                             onClick={() => copyToClipboard(acc.gmail, `hist-gmail-${idx}`, 'Gmail')}
-                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
+                            className="self-end sm:self-auto px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
                           >
                             {copiedId === `hist-gmail-${idx}` ? 'Tersalin' : 'Salin'}
                           </button>
                         )}
                       </div>
 
-                      {/* Baris 2: Inbox URL murni dari API */}
-                      <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-black text-slate-500 shrink-0">Inbox URL:</span>
+                      {/* Baris 2: Inbox URL murni dari API (tanpa terpotong di mobile) */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                          <span className="text-xs font-black text-slate-500 shrink-0 mt-0.5 sm:mt-0">Inbox URL:</span>
                           <a 
                             href={acc.inboxurl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline truncate block"
+                            className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline break-all leading-snug block"
                           >
                             {acc.inboxurl || '-'}
                           </a>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
                           {acc.inboxurl && (
                             <a
                               href={acc.inboxurl}

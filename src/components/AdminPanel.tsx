@@ -1138,8 +1138,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToUser }) => {
 
       {/* MODAL: REJECT DEPOSIT DENGAN ALASAN JELAS (FIXED DARI SEBELUMNYA) */}
       {rejectModalOpen && depositToReject && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-slate-100 space-y-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
@@ -1236,8 +1236,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToUser }) => {
 
       {/* Modal: Edit User Balance */}
       {balanceModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-black text-slate-900">Edit Saldo: {selectedUser.name}</h3>
             <div className="text-xs text-slate-500">
               Saldo saat ini: <strong className="font-mono text-slate-800">{formatRupiah(selectedUser.balance || 0)}</strong>
@@ -1288,8 +1288,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToUser }) => {
 
       {/* Modal: Edit / Add Product */}
       {editingProduct && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <form onSubmit={handleSaveProduct} className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <form onSubmit={handleSaveProduct} className="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-black text-slate-900">
               {isNewProduct ? 'Tambah Produk Baru' : `Edit: ${editingProduct.name}`}
             </h3>

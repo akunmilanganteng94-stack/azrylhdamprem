@@ -218,22 +218,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Quick Wallet CTA buttons */}
-          <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2.5">
+          <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2 w-full md:w-auto">
             <button
               type="button"
               onClick={onOpenDeposit}
-              className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 md:flex-initial px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer min-w-0"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Isi Saldo (Top Up)</span>
+              <Plus className="w-4 h-4 stroke-[3] shrink-0" />
+              <span className="truncate">Isi Saldo</span>
             </button>
             <button
               type="button"
               onClick={() => onNavigateTab('orders')}
-              className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 md:flex-initial px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer min-w-0"
             >
-              <History className="w-4 h-4" />
-              <span>Order Saya</span>
+              <History className="w-4 h-4 shrink-0" />
+              <span className="truncate">Order Saya</span>
             </button>
           </div>
         </div>
@@ -347,7 +347,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
           Menu Cepat
         </h2>
-        <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3.5">
           {quickMenus.map((menu) => {
             const Icon = menu.icon;
             return (
@@ -355,20 +355,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 key={menu.id}
                 type="button"
                 onClick={menu.onClick}
-                className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-100 shadow-xs hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center relative group cursor-pointer"
+                className="bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-4 border border-slate-100 shadow-xs hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center relative group cursor-pointer w-full min-w-0"
               >
                 {menu.badge && (
-                  <span className="absolute top-2 right-2 px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 text-[8px] sm:text-[9px] font-black uppercase">
+                  <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1 py-0.2 sm:px-1.5 rounded-md bg-emerald-100 text-emerald-800 text-[8px] sm:text-[9px] font-black uppercase">
                     {menu.badge}
                   </span>
                 )}
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${menu.color} shadow-xs mb-1.5 transition-transform group-hover:rotate-6`}>
-                  <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${menu.color} shadow-xs mb-1 sm:mb-1.5 transition-transform group-hover:rotate-6 shrink-0`}>
+                  <Icon className="w-4 h-4 sm:w-5.5 sm:h-5.5" />
                 </div>
-                <span className="text-[11px] sm:text-xs font-black text-slate-900 leading-tight">
+                <span className="text-[10px] sm:text-xs font-black text-slate-900 leading-tight truncate w-full">
                   {menu.title}
                 </span>
-                <span className="text-[9px] text-slate-400 font-medium hidden sm:block mt-0.5">
+                <span className="text-[9px] text-slate-400 font-medium hidden sm:block mt-0.5 truncate w-full">
                   {menu.subtitle}
                 </span>
               </button>

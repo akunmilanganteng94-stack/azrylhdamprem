@@ -96,7 +96,7 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-20">
+    <div className="max-w-2xl mx-auto space-y-5 sm:space-y-6 pb-24 sm:pb-28">
       {/* Wallet Balance Hero Card in Emerald Dark */}
       <div className="bg-gradient-to-tr from-slate-950 via-emerald-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-emerald-900/40 relative overflow-hidden">
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -252,7 +252,7 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
           </div>
 
           {/* Segmented Button Metode: DANA / QRIS */}
-          <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl">
             <button
               type="button"
               onClick={() => setMethod('QRIS')}
@@ -262,8 +262,8 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <QrCode className="w-4 h-4" />
-              <span>QRIS Instan (Semua E-Wallet & Bank)</span>
+              <QrCode className="w-4 h-4 shrink-0" />
+              <span>QRIS (Semua E-Wallet & Bank)</span>
             </button>
             <button
               type="button"
@@ -274,14 +274,14 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <Smartphone className="w-4 h-4" />
+              <Smartphone className="w-4 h-4 shrink-0" />
               <span>DANA E-Wallet</span>
             </button>
           </div>
 
           {/* TAMPILAN DETAIL DANA */}
           {method === 'DANA' && (
-            <div className="p-5 sm:p-6 rounded-2xl bg-sky-50/70 border border-sky-200 text-sky-950 space-y-4">
+            <div className="p-4 sm:p-6 rounded-2xl bg-sky-50/70 border border-sky-200 text-sky-950 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-wider text-sky-800">
                   Pembayaran DANA
@@ -291,17 +291,17 @@ export const DepositView: React.FC<DepositViewProps> = ({ onSuccessNavigate, set
                 </span>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-sky-200 flex items-center justify-between gap-3">
-                <div>
+              <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-sky-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="min-w-0">
                   <span className="text-[10px] text-slate-400 block font-bold uppercase">Nomor Akun DANA</span>
-                  <span className="text-lg sm:text-xl font-black font-mono text-slate-900 tracking-wider">
+                  <span className="text-lg sm:text-xl font-black font-mono text-slate-900 tracking-wider select-all break-all">
                     {danaNumber}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyDana}
-                  className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  className="self-start sm:self-auto px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs shrink-0"
                 >
                   {copiedDana ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   <span>{copiedDana ? 'Tersalin' : 'Salin Nomor'}</span>

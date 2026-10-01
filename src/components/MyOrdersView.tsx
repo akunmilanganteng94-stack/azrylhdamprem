@@ -98,13 +98,13 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-5 sm:space-y-6 pb-24 sm:pb-28">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <span className="p-2 rounded-2xl bg-emerald-50 text-emerald-600">
-              <Receipt className="w-6 h-6 stroke-[2.5]" />
+              <Receipt className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
             </span>
             <span>ORDER SAYA</span>
           </h1>
@@ -123,18 +123,18 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
       </div>
 
       {/* Product Category Separator Tabs (Pisahin AM Prem & HD) */}
-      <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-2xl">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 bg-slate-100 rounded-2xl">
         <button
           type="button"
           onClick={() => setProductFilter('ALL')}
-          className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-1.5 sm:px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer min-w-0 ${
             productFilter === 'ALL'
               ? 'bg-white text-emerald-700 shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>Semua Produk</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700">
+          <span className="truncate">Semua</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 shrink-0">
             {orders.length}
           </span>
         </button>
@@ -142,14 +142,14 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
         <button
           type="button"
           onClick={() => setProductFilter('am_prem')}
-          className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-1.5 sm:px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer min-w-0 ${
             productFilter === 'am_prem'
               ? 'bg-white text-emerald-700 shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>AM Prem</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">
+          <span className="truncate">AM Prem</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
             {orders.filter(o => o.productId === 'am_prem').length}
           </span>
         </button>
@@ -157,21 +157,21 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
         <button
           type="button"
           onClick={() => setProductFilter('hd_foto')}
-          className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-1.5 sm:px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer min-w-0 ${
             productFilter === 'hd_foto'
               ? 'bg-white text-teal-700 shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>HD Foto AI</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-100 text-teal-800">
+          <span className="truncate">HD Foto</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-100 text-teal-800 shrink-0">
             {orders.filter(o => o.productId === 'hd_foto').length}
           </span>
         </button>
       </div>
 
       {/* Modern Status Filter Segmented Tabs */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl overflow-x-auto no-scrollbar">
         {[
           { key: 'ALL', label: 'Semua Status', count: orders.filter(o => productFilter === 'ALL' || o.productId === productFilter).length },
           { key: 'SUCCESS', label: 'Success', count: orders.filter(o => (productFilter === 'ALL' || o.productId === productFilter) && o.status === 'SUCCESS').length },
@@ -345,11 +345,11 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
                                 </button>
                               </div>
 
-                              {/* Baris 1: Gmail murni saja dengan tombol salin */}
-                              <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-xs font-black text-slate-500 shrink-0">Gmail:</span>
-                                  <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all truncate">
+                              {/* Baris 1: Gmail murni saja dengan tombol salin (tanpa terpotong di mobile) */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                                  <span className="text-xs font-black text-slate-500 shrink-0 mt-0.5 sm:mt-0">Gmail:</span>
+                                  <span className="text-xs sm:text-sm font-mono font-black text-slate-900 select-all break-all leading-snug">
                                     {acc.gmail || '-'}
                                   </span>
                                 </div>
@@ -357,27 +357,27 @@ export const MyOrdersView: React.FC<MyOrdersViewProps> = ({ onNavigateToOrder })
                                   <button
                                     type="button"
                                     onClick={() => handleCopyText(acc.gmail, `gmail-${order.id}-${idx}`, 'Gmail')}
-                                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
+                                    className="self-end sm:self-auto px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
                                   >
                                     {copiedId === `gmail-${order.id}-${idx}` ? 'Tersalin' : 'Salin'}
                                   </button>
                                 )}
                               </div>
 
-                              {/* Baris 2: Inbox URL murni dari API saja dengan tombol buka & salin */}
-                              <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-xs font-black text-slate-500 shrink-0">Inbox URL:</span>
+                              {/* Baris 2: Inbox URL murni dari API saja dengan tombol buka & salin (tanpa terpotong di mobile) */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                                  <span className="text-xs font-black text-slate-500 shrink-0 mt-0.5 sm:mt-0">Inbox URL:</span>
                                   <a 
                                     href={acc.inboxurl} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline truncate block"
+                                    className="text-xs sm:text-sm font-mono text-sky-600 hover:text-sky-800 underline break-all leading-snug block"
                                   >
                                     {acc.inboxurl || '-'}
                                   </a>
                                 </div>
-                                <div className="flex items-center gap-1.5 shrink-0">
+                                <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
                                   {acc.inboxurl && (
                                     <a
                                       href={acc.inboxurl}

@@ -21,14 +21,14 @@ export const Logo: React.FC<LogoProps> = ({
   };
 
   const textSizes = {
-    sm: 'text-base',
-    md: 'text-lg',
-    lg: 'text-xl',
-    xl: 'text-2xl'
+    sm: 'text-base font-black',
+    md: 'text-lg sm:text-xl font-black',
+    lg: 'text-xl sm:text-2xl font-black',
+    xl: 'text-2xl sm:text-3xl font-black'
   };
 
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
+    <div className={`flex items-center gap-2 select-none ${className}`}>
       {/* Abstract Modern 'A' Mark in Hijau Keren (Muda) */}
       <div className={`relative ${iconSizes[size]} shrink-0 flex items-center justify-center`}>
         <svg 
@@ -107,16 +107,9 @@ export const Logo: React.FC<LogoProps> = ({
       </div>
 
       {showText && (
-        <div className="flex flex-col leading-none">
-          <div className="flex items-center gap-1">
-            <span className={`font-black tracking-wider ${textSizes[size]} ${light ? 'text-white' : 'text-slate-900'} font-mono`}>
-              AZRYL<span className="text-emerald-500">PREM</span>
-            </span>
-          </div>
-          <span className="text-[9px] font-bold tracking-widest uppercase text-emerald-600 font-sans mt-0.5">
-            Automated Tools
-          </span>
-        </div>
+        <span className={`tracking-wider ${textSizes[size]} ${light ? 'text-white' : 'text-slate-900'} font-mono leading-none select-none inline-flex items-center`}>
+          AZRYL<span className="text-emerald-500">PREM</span>
+        </span>
       )}
     </div>
   );
