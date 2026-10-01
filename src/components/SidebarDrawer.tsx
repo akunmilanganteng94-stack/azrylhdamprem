@@ -52,7 +52,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
     { id: 'order', label: 'Order Layanan', icon: ShoppingBag, badge: 'Utama' },
     { id: 'orders', label: 'Order Saya', icon: History },
     { id: 'deposit', label: 'Isi Saldo', icon: WalletCards, badge: 'Instant' },
-    { id: 'referral', label: 'Program Referral', icon: Gift, badge: 'Rp500' },
+    { id: 'referral', label: 'Program Referral', icon: Gift, badge: '10K' },
     { id: 'katalog', label: 'Daftar Harga', icon: Tag },
     { id: 'mutasi', label: 'Mutasi Saldo', icon: ReceiptText },
     { id: 'profile', label: 'Profil Akun', icon: UserCheck },
