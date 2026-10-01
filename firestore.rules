@@ -69,5 +69,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Notifications collection
+    match /notifications/{notifId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

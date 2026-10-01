@@ -40,7 +40,6 @@ async function startServer() {
     try {
       const { count = 1, endpoint } = req.body;
       const targetUrl = endpoint || 'https://api.zyvor.my.id/api/am/bulkv3';
-
       const requestPayload = { count: String(count) };
 
       const controller = new AbortController();
@@ -56,12 +55,9 @@ async function startServer() {
         body: JSON.stringify(requestPayload),
         signal: controller.signal
       });
-
       clearTimeout(timeout);
 
-      const contentType = response.headers.get('content-type') || '';
       const textResponse = await response.text();
-
       let jsonResponse;
       try {
         jsonResponse = JSON.parse(textResponse);
@@ -92,8 +88,6 @@ async function startServer() {
   });
 
   // Proxy for HD FOTO Upscale API
-  // Target: POST https://api.zyvor.my.id/api/imagehd/upscalev2
-  // Multipart: image = file upload, scale = 2
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 15 * 1024 * 1024 } // 15MB limit
@@ -111,7 +105,6 @@ async function startServer() {
       const scale = req.body.scale || '2';
       const endpoint = req.body.endpoint || 'https://api.zyvor.my.id/api/imagehd/upscalev2';
 
-      // Build native FormData with Blob
       const formData = new FormData();
       const fileBlob = new Blob([req.file.buffer as any], { type: req.file.mimetype });
       formData.append('image', fileBlob, req.file.originalname || 'upload.jpg');
@@ -128,11 +121,9 @@ async function startServer() {
         body: formData,
         signal: controller.signal
       });
-
       clearTimeout(timeout);
 
       const contentType = response.headers.get('content-type') || '';
-
       if (contentType.includes('image/')) {
         const arrayBuffer = await response.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
@@ -193,8 +184,8 @@ async function startServer() {
         headers: { 'User-Agent': 'AZRYLPREM-HealthCheck/1.0' },
         signal: controller.signal
       });
-
       clearTimeout(timeout);
+
       return res.json({
         success: true,
         status: response.status,
@@ -217,7 +208,6 @@ async function startServer() {
       res.sendFile(path.resolve(distPath, 'index.html'));
     });
   } else {
-    // Dynamic import vite for dev server
     const { createServer } = await import('vite');
     const vite = await createServer({
       server: { middlewareMode: true, host: '0.0.0.0', port: PORT },
