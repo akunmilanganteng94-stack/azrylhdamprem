@@ -29,7 +29,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   ) => {
     const id = Date.now().toString() + Math.random().toString(36).substring(2, 5);
     const newToast: ToastMessage = { id, type, message, description, duration };
-
     setToasts((prev) => [...prev, newToast]);
 
     if (duration > 0) {
@@ -95,7 +94,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 {isError && <AlertCircle className="w-5 h-5 text-rose-400" />}
                 {!isSuccess && !isWarning && !isError && <Info className="w-5 h-5 text-blue-400" />}
               </div>
-
               <div className="flex-1 min-w-0 pr-1">
                 <p className="text-sm font-semibold tracking-wide leading-tight">
                   {toast.message}
@@ -106,7 +104,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   </p>
                 )}
               </div>
-
               <button
                 type="button"
                 onClick={() => removeToast(toast.id)}

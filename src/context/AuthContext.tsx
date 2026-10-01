@@ -59,7 +59,6 @@ const DEFAULT_SETTINGS: SystemSettings = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 const OWNER_EMAIL = 'apriliansyahazril10@gmail.com';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -111,7 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setDoc(doc(db, 'settings', 'system'), DEFAULT_SETTINGS).catch(console.error);
       }
     });
-
     return () => unsub();
   }, []);
 
@@ -121,7 +119,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const authUnsub = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-
       if (profileUnsub) {
         profileUnsub();
         profileUnsub = null;
@@ -129,7 +126,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (currentUser) {
         const userDocRef = doc(db, 'users', currentUser.uid);
-
         profileUnsub = onSnapshot(userDocRef, async (snap) => {
           if (snap.exists()) {
             const data = snap.data();
@@ -219,7 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), pass);
-      showToast('Berhasil masuk ke AZRYLPREM 👋', 'success');
+      showToast('Berhasil masuk ke AZRYLPREM 🎉', 'success');
     } catch (error: any) {
       setLoading(false);
       let msg = 'Gagal masuk. Periksa email dan password.';
@@ -238,6 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
       await updateProfile(cred.user, { displayName: name.trim() });
+
       const isOwner = email.trim() === OWNER_EMAIL;
       
       const profileData: any = {
@@ -252,9 +249,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: serverTimestamp(),
         lastSeen: serverTimestamp(),
       };
-
       await setDoc(doc(db, 'users', cred.user.uid), profileData);
-      showToast(`Selamat datang di AZRYLPREM, ${name.trim()}! 🎉`, 'success');
+      showToast(`Selamat datang di AZRYLPREM, ${name.trim()}! 🚀`, 'success');
     } catch (error: any) {
       setLoading(false);
       let msg = 'Gagal mendaftar.';
@@ -343,7 +339,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         showToast('Notifikasi AZRYLPREM telah diaktifkan! 🔔', 'success');
-
         const messaging = await getSafeMessaging();
         if (messaging && user) {
           try {
