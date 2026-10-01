@@ -16,21 +16,25 @@ import { AdminPanel } from './components/AdminPanel';
 import { KatalogModal } from './components/KatalogModal';
 import { ApkModal } from './components/ApkModal';
 import { Logo } from './components/Logo';
-import { listenProducts, listenSystemSettings, INITIAL_PRODUCTS, DEFAULT_SETTINGS } from './services/firestoreService';
+import { 
+  listenProducts, 
+  listenSystemSettings, 
+  listenBroadcastNotifications,
+  INITIAL_PRODUCTS, 
+  DEFAULT_SETTINGS 
+} from './services/firestoreService';
 import { requestNotificationPermission, setupForegroundMessageListener } from './firebase/messaging';
 import type { ProductItem, SystemSettings } from './types';
 
 const MainApp: React.FC = () => {
-  const { currentUser, profile, loading: authLoading, isAdmin } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const { showSuccess, showInfo } = useToast();
-
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [orderInitialProduct, setOrderInitialProduct] = useState<'am' | 'hd'>('am');
   const [katalogOpen, setKatalogOpen] = useState<boolean>(false);
   const [apkOpen, setApkOpen] = useState<boolean>(false);
   const [hasNotifPermission, setHasNotifPermission] = useState<boolean>(false);
-
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [settings, setSettings] = useState<SystemSettings>(DEFAULT_SETTINGS);
 
@@ -46,7 +50,6 @@ const MainApp: React.FC = () => {
   useEffect(() => {
     const unsubProducts = listenProducts(setProducts);
     const unsubSettings = listenSystemSettings(setSettings);
-
     return () => {
       unsubProducts();
       unsubSettings();
@@ -58,16 +61,42 @@ const MainApp: React.FC = () => {
     if ('Notification' in window && Notification.permission === 'granted') {
       setHasNotifPermission(true);
     }
-
     const unsubMessaging = setupForegroundMessageListener((payload) => {
       const title = payload.notification?.title || payload.data?.title || 'Notifikasi AZRYLPREM';
       const body = payload.notification?.body || payload.data?.body || '';
       showSuccess(title, body);
     });
-
     return () => {
       if (typeof unsubMessaging === 'function') (unsubMessaging as any)();
     };
+  }, [showSuccess]);
+
+  // Real-time broadcast notifications listener from Admin
+  useEffect(() => {
+    let initialLoad = true;
+    let latestSeenId = '';
+    const unsub = listenBroadcastNotifications((list) => {
+      if (list.length === 0) return;
+      if (initialLoad) {
+        initialLoad = false;
+        latestSeenId = list[0].id;
+        return;
+      }
+      const newest = list[0];
+      if (newest && newest.id !== latestSeenId) {
+        latestSeenId = newest.id;
+        showSuccess(`📢 ${newest.title}`, newest.message);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification(`📢 ${newest.title}`, {
+              body: newest.message,
+              icon: '/favicon.ico'
+            });
+          } catch {}
+        }
+      }
+    });
+    return () => unsub();
   }, [showSuccess]);
 
   const handleRequestNotifications = async () => {
@@ -76,7 +105,6 @@ const MainApp: React.FC = () => {
       setHasNotifPermission(true);
       return;
     }
-
     const token = await requestNotificationPermission();
     if (token) {
       setHasNotifPermission(true);
@@ -115,7 +143,7 @@ const MainApp: React.FC = () => {
     );
   }
 
-  // Not logged in: Show Auth View (clean, green, no demo buttons)
+  // Not logged in: Show Auth View
   if (!currentUser) {
     return <AuthView />;
   }
@@ -123,7 +151,7 @@ const MainApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col selection:bg-emerald-500 selection:text-white pb-16 sm:pb-20">
       {/* Sticky Header / Navbar */}
-      <Navbar
+      <Navbar 
         onOpenSidebar={() => setSidebarOpen(true)}
         onOpenProfile={() => setActiveTab('profile')}
         onOpenDeposit={() => setActiveTab('deposit')}
@@ -158,7 +186,7 @@ const MainApp: React.FC = () => {
             />
           )}
 
-          {/* TAB 2: ORDER UTAMA (NEW) */}
+          {/* TAB 2: ORDER UTAMA */}
           {activeTab === 'order' && (
             <OrderView
               initialProduct={orderInitialProduct}
@@ -168,12 +196,12 @@ const MainApp: React.FC = () => {
             />
           )}
 
-          {/* TAB 3: ORDER SAYA (NEW) */}
+          {/* TAB 3: ORDER SAYA */}
           {activeTab === 'orders' && (
             <MyOrdersView onNavigateToOrder={() => handleOpenOrder('am')} />
           )}
 
-          {/* TAB 4: DEPOSIT (SIMPLIFIED) */}
+          {/* TAB 4: DEPOSIT */}
           {activeTab === 'deposit' && (
             <DepositView
               onSuccessNavigate={() => setActiveTab('orders')}
@@ -181,7 +209,7 @@ const MainApp: React.FC = () => {
             />
           )}
 
-          {/* TAB 5: PROGRAM REFERRAL (BONUS DIUBAH JADI REFERRAL) */}
+          {/* TAB 5: PROGRAM REFERRAL */}
           {activeTab === 'referral' && (
             <ReferralView />
           )}
@@ -280,7 +308,6 @@ const MainApp: React.FC = () => {
         products={products}
         onSelectProduct={handleSelectProduct}
       />
-
       <ApkModal
         isOpen={apkOpen}
         onClose={() => setApkOpen(false)}
