@@ -2,16 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, isSupported, Messaging } from 'firebase/messaging';
-
-export const firebaseConfig = {
-  apiKey: "AIzaSyBAuN6Yn2U9OwUhNbBolF5x0T4_T3iaCUg",
-  authDomain: "azrylstore-7f4e2.firebaseapp.com",
-  projectId: "azrylstore-7f4e2",
-  storageBucket: "azrylstore-7f4e2.firebasestorage.app",
-  messagingSenderId: "542820984224",
-  appId: "1:542820984224:web:af283f9c0c4f0bf808f0c5",
-  measurementId: "G-EC10M2HLBR",
-};
+import { firebaseConfig } from '../firebase/config';
 
 // Initialize Firebase singleton
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
