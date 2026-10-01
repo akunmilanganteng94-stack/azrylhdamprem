@@ -149,7 +149,7 @@ const MainApp: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col selection:bg-emerald-500 selection:text-white pb-16 sm:pb-20">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50/70 text-slate-900 flex flex-col selection:bg-emerald-500 selection:text-white pb-24 sm:pb-28">
       {/* Sticky Header / Navbar */}
       <Navbar 
         onOpenSidebar={() => setSidebarOpen(true)}
@@ -171,7 +171,7 @@ const MainApp: React.FC = () => {
       />
 
       {/* Main View Router with fluid transition effect */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 py-5 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 py-3.5 sm:py-7">
         <div key={activeTab} className="animate-in fade-in zoom-in-98 duration-200 ease-out">
           {/* TAB 1: DASHBOARD */}
           {activeTab === 'dashboard' && (
@@ -276,8 +276,8 @@ const MainApp: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="py-6 border-t border-slate-200/60 bg-white/50 text-center text-xs text-slate-500 mb-16 sm:mb-20">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="py-6 border-t border-slate-200/60 bg-white/50 text-center text-xs text-slate-500 mb-20 sm:mb-24">
+        <div className="max-w-7xl mx-auto px-3 flex flex-col sm:flex-row items-center justify-between gap-2.5">
           <p>© {new Date().getFullYear()} AZRYLPREM. Seluruh hak cipta dilindungi.</p>
           <div className="flex items-center gap-4 text-[11px] font-medium text-slate-600">
             <a
